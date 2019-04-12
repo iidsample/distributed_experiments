@@ -18,6 +18,7 @@ sudo ./wondershaper -a ens3 -u 1000 -d 2000
 ```bash
 sudo ./wondershape -c -a ens3
 ```
+5. Also keep in mind that you need to clear limits before updating them.
 
 ## Running the pytorch code
 Run the following code with right paremeters based on your setup.

@@ -16,7 +16,7 @@ sudo ./wondershaper -a ens3 -u 1000 -d 2000
 4. To clear the limit on a interface. Look at the following command. In the
    following command we clear the limits on ens3.
 ```bash
-sudo ./wondershape -c -a ens3
+sudo ./wondershaper -c -a ens3
 ```
 5. Also keep in mind that you need to clear limits before updating them.
 

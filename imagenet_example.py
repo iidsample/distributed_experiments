@@ -282,6 +282,7 @@ def train(batch_size, model, criterion, optimizer, epoch, args):
 
         # compute output
         tic_1 = time.time()
+        print("Tic 1 value = {}".format(tic_1))
         tic = time.time()
         output = model(input)
         print ("Time taken forward {}".format(time.time() - tic))
@@ -301,6 +302,7 @@ def train(batch_size, model, criterion, optimizer, epoch, args):
         tic = time.time()
         optimizer.step()
         print ("time taken for optimizer {}".format(time.time() - tic))
+        print("before backward value = {}".format(time.time())
         print ("total time take forward + backward {}".format(time.time()-tic_1))
 
         # measure elapsed time

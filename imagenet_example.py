@@ -281,7 +281,10 @@ def train(batch_size, model, criterion, optimizer, epoch, args):
             target = target.cuda(args.gpu, non_blocking=True)
 
         # compute output
-        tic_1 = time.time()
+        start_time = torch.cuda.Event(enable_timing=True)
+        stop_time = torch.cuda.Event(enable_timing=True)
+
+        start_time.record()
         print("Tic 1 value = {}".format(tic_1))
         tic = time.time()
         output = model(input)
@@ -301,11 +304,12 @@ def train(batch_size, model, criterion, optimizer, epoch, args):
         print ("time take for backward {}".format(time.time() - tic))
         tic = time.time()
         optimizer.step()
-        torch.cuda.synchronize()
         print ("time taken for optimizer {}".format(time.time() - tic))
         print("before backward value = {}".format(time.time()))
+        stop_time.record()
+        torch.cuda.synchronize()
         print ("total time take forward + backward {}".format(time.time()-tic_1))
-
+        print ("Time from cuda event timer ={}".format(start_time.elapsed_time(stop_time))
         # measure elapsed time
         batch_time.update(time.time() - end)
         end = time.time()

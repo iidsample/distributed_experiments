@@ -309,7 +309,7 @@ def train(batch_size, model, criterion, optimizer, epoch, args):
         stop_time.record()
         torch.cuda.synchronize()
         print ("total time take forward + backward {}".format(time.time()-tic_1))
-        print ("Time from cuda event timer ={}".format(start_time.elapsed_time(stop_time))
+        print ("Time from cuda event timer={}".format(start_time.elapsed_time(stop_time)))
         # measure elapsed time
         batch_time.update(time.time() - end)
         end = time.time()

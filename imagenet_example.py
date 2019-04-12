@@ -301,6 +301,7 @@ def train(batch_size, model, criterion, optimizer, epoch, args):
         print ("time take for backward {}".format(time.time() - tic))
         tic = time.time()
         optimizer.step()
+        torch.cuda.synchronize()
         print ("time taken for optimizer {}".format(time.time() - tic))
         print("before backward value = {}".format(time.time()))
         print ("total time take forward + backward {}".format(time.time()-tic_1))

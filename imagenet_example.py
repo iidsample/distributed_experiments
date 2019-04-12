@@ -285,6 +285,7 @@ def train(batch_size, model, criterion, optimizer, epoch, args):
         stop_time = torch.cuda.Event(enable_timing=True)
 
         start_time.record()
+        tic_1 = time.time()
         print("Tic 1 value = {}".format(tic_1))
         tic = time.time()
         output = model(input)

@@ -5,6 +5,7 @@ import shutil
 import time
 import warnings
 import sys
+import logging
 
 import torch
 import torch.nn as nn
@@ -18,6 +19,10 @@ import torch.utils.data.distributed
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import torchvision.models as models
+
+logging.basicConfig()
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 model_names = sorted(name for name in models.__dict__
     if name.islower() and not name.startswith("__")
@@ -118,7 +123,7 @@ def main_worker(gpu, ngpus_per_node, args):
     args.gpu = gpu
 
     if args.gpu is not None:
-        print("Use GPU: {} for training".format(args.gpu))
+        logger.info("Use GPU: {} for training".format(args.gpu))
 
     if args.distributed:
         if args.dist_url == "env://" and args.rank == -1:
@@ -129,13 +134,13 @@ def main_worker(gpu, ngpus_per_node, args):
             args.rank = args.rank * ngpus_per_node + gpu
         dist.init_process_group(backend=args.dist_backend, init_method="tcp://" + args.dist_url + ":2345",
                                 world_size=args.world_size, rank=args.rank)
-        print ("distributed training setup")
+        logger.info ("distributed training setup")
     # create model
     if args.pretrained:
-        print("=> using pre-trained model '{}'".format(args.arch))
+        logger.info("=> using pre-trained model '{}'".format(args.arch))
         model = models.__dict__[args.arch](pretrained=True)
     else:
-        print("=> creating model '{}'".format(args.arch))
+        logger.info("=> creating model '{}'".format(args.arch))
         model = models.__dict__[args.arch]()
 
     if args.distributed:
@@ -177,16 +182,16 @@ def main_worker(gpu, ngpus_per_node, args):
     # optionally resume from a checkpoint
     if args.resume:
         if os.path.isfile(args.resume):
-            print("=> loading checkpoint '{}'".format(args.resume))
+            logger.info("=> loading checkpoint '{}'".format(args.resume))
             checkpoint = torch.load(args.resume)
             args.start_epoch = checkpoint['epoch']
             best_acc1 = checkpoint['best_acc1']
             model.load_state_dict(checkpoint['state_dict'])
             optimizer.load_state_dict(checkpoint['optimizer'])
-            print("=> loaded checkpoint '{}' (epoch {})"
+            logger.info("=> loaded checkpoint '{}' (epoch {})"
                   .format(args.resume, checkpoint['epoch']))
         else:
-            print("=> no checkpoint found at '{}'".format(args.resume))
+            logger.info("=> no checkpoint found at '{}'".format(args.resume))
 
     cudnn.benchmark = True
 
@@ -271,9 +276,9 @@ def train(batch_size, model, criterion, optimizer, epoch, args):
     for i in range(2500):
         # measure data loading time
         input = torch.rand(batch_size, 3, 224,224)
-        print ('created input {}'.format(input.shape))
+        logger.info ('created input {}'.format(input.shape))
         target = torch.randint(999, (batch_size,))
-        print ('target input {}'.format(target.shape))
+        logger.info ('target input {}'.format(target.shape))
         data_time.update(time.time() - end)
 
         if args.gpu is not None:
@@ -286,10 +291,10 @@ def train(batch_size, model, criterion, optimizer, epoch, args):
 
         start_time.record()
         tic_1 = time.time()
-        print("Tic 1 value = {}".format(tic_1))
+        logger.info("Tic 1 value = {}".format(tic_1))
         tic = time.time()
         output = model(input)
-        print ("Time taken forward {}".format(time.time() - tic))
+        logger.info ("Time taken forward {}".format(time.time() - tic))
         loss = criterion(output, target)
 
         # measure accuracy and record loss
@@ -302,21 +307,21 @@ def train(batch_size, model, criterion, optimizer, epoch, args):
         optimizer.zero_grad()
         tic = time.time()
         loss.backward()
-        print ("time take for backward {}".format(time.time() - tic))
+        logger.info ("time take for backward {}".format(time.time() - tic))
         tic = time.time()
         optimizer.step()
-        print ("time taken for optimizer {}".format(time.time() - tic))
-        print("before backward value = {}".format(time.time()))
+        logger.info ("time taken for optimizer {}".format(time.time() - tic))
+        logger.info("before backward value = {}".format(time.time()))
         stop_time.record()
         torch.cuda.synchronize()
-        print ("total time take forward + backward {}".format(time.time()-tic_1))
-        print ("Time from cuda event timer={}".format(start_time.elapsed_time(stop_time)))
+        logger.info ("total time take forward + backward {}".format(time.time()-tic_1))
+        logger.info ("Time from cuda event timer={}".format(start_time.elapsed_time(stop_time)))
         # measure elapsed time
         batch_time.update(time.time() - end)
         end = time.time()
 
         if i % args.print_freq == 0:
-            print('Epoch: [{0}][{1}/{2}]\t'
+            logger.info('Epoch: [{0}][{1}/{2}]\t'
                   'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
                   'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
                   'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
@@ -359,7 +364,7 @@ def validate(batch_size, model, criterion, args):
             end = time.time()
 
             if i % args.print_freq == 0:
-                print('Test: [{0}/{1}]\t'
+                logger.info('Test: [{0}/{1}]\t'
                       'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
                       'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
                       'Acc@1 {top1.val:.3f} ({top1.avg:.3f})\t'
@@ -367,7 +372,7 @@ def validate(batch_size, model, criterion, args):
                        i, 2500, batch_time=batch_time, loss=losses,
                        top1=top1, top5=top5))
 
-        print(' * Acc@1 {top1.avg:.3f} Acc@5 {top5.avg:.3f}'
+        logger.info(' * Acc@1 {top1.avg:.3f} Acc@5 {top5.avg:.3f}'
               .format(top1=top1, top5=top5))
 
     return top1.avg

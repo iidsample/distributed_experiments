@@ -242,7 +242,7 @@ def main_worker(gpu, ngpus_per_node, args):
         # adjust_learning_rate(optimizer, epoch, args)
 
         # train for one epoch
-        train(128, model, criterion, optimizer, epoch, args)
+        train(args.batch_size / args.world_size, model, criterion, optimizer, epoch, args)
 
         # evaluate on validation set
         acc1 = validate(128, model, criterion, args)

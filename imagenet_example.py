@@ -24,6 +24,7 @@ logging.basicConfig()
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+
 model_names = sorted(name for name in models.__dict__
     if name.islower() and not name.startswith("__")
     and callable(models.__dict__[name]))
@@ -242,7 +243,7 @@ def main_worker(gpu, ngpus_per_node, args):
         # adjust_learning_rate(optimizer, epoch, args)
 
         # train for one epoch
-        train(args.batch_size / args.world_size, model, criterion, optimizer, epoch, args)
+        train(int(args.batch_size / args.world_size), model, criterion, optimizer, epoch, args)
 
         # evaluate on validation set
         acc1 = validate(128, model, criterion, args)
@@ -314,7 +315,11 @@ def train(batch_size, model, criterion, optimizer, epoch, args):
         logger.info("before backward value = {}".format(time.time()))
         stop_time.record()
         torch.cuda.synchronize()
-        logger.info ("total time take forward + backward {}".format(time.time()-tic_1))
+    
+        iter_cost = time.time()-tic_1
+        logger.info ("total time take forward + backward {}".format(iter_cost))
+        with open("log_node_{}".format(args.rank), "a") as file:
+            file.write("{}\n".format(iter_cost))
         logger.info ("Time from cuda event timer={}".format(start_time.elapsed_time(stop_time)))
         # measure elapsed time
         batch_time.update(time.time() - end)

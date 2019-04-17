@@ -285,12 +285,12 @@ def train(batch_size, model, criterion, optimizer, epoch, args):
         if args.gpu is not None:
             input = input.cuda(args.gpu, non_blocking=True)
             target = target.cuda(args.gpu, non_blocking=True)
-
+        torch.cuda.synchronize()
         # compute output
         start_time = torch.cuda.Event(enable_timing=True)
         stop_time = torch.cuda.Event(enable_timing=True)
 
-        # start_time.record()
+        start_time.record()
         tic_1 = time.time()
         logger.info("Tic 1 value = {}".format(tic_1))
         tic = time.time()

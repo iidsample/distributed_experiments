@@ -311,7 +311,7 @@ def train(batch_size, model, criterion, optimizer, epoch, args):
         logger.info ("time take for backward {}".format(time.time() - tic))
         tic = time.time()
         optimizer.step()
-        printf("Loss val dummy = {}".format(loss.item()))
+        print("Loss val dummy = {}".format(loss.item()))
         logger.info ("time taken for optimizer {}".format(time.time() - tic))
         logger.info("before backward value = {}".format(time.time()))
         # stop_time.record()

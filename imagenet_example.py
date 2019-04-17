@@ -287,8 +287,8 @@ def train(batch_size, model, criterion, optimizer, epoch, args):
             target = target.cuda(args.gpu, non_blocking=True)
 
         # compute output
-        # start_time = torch.cuda.Event(enable_timing=True)
-        # stop_time = torch.cuda.Event(enable_timing=True)
+        start_time = torch.cuda.Event(enable_timing=True)
+        stop_time = torch.cuda.Event(enable_timing=True)
 
         # start_time.record()
         tic_1 = time.time()
@@ -314,14 +314,14 @@ def train(batch_size, model, criterion, optimizer, epoch, args):
         print("Loss val dummy = {}".format(loss.item()))
         logger.info ("time taken for optimizer {}".format(time.time() - tic))
         logger.info("before backward value = {}".format(time.time()))
-        # stop_time.record()
-        # torch.cuda.synchronize()
+        stop_time.record()
+        torch.cuda.synchronize()
     
         iter_cost = time.time()-tic_1
         logger.info ("total time take forward + backward {}".format(iter_cost))
         with open("log_node_{}".format(args.rank), "a") as file:
             file.write("{}\n".format(iter_cost))
-        # logger.info ("Time from cuda event timer={}".format(start_time.elapsed_time(stop_time)))
+        logger.info ("Time from cuda event timer={}".format(start_time.elapsed_time(stop_time)))
         # measure elapsed time
         batch_time.update(time.time() - end)
         end = time.time()

@@ -18,7 +18,7 @@ import torch.utils.data.distributed
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import torchvision.models as models
-
+import numpy as np
 
 def main():
     val_range = np.arange(0,1,0.1)
@@ -29,7 +29,7 @@ def main():
     for i in val_range:
         data_dict[i] = 0
 
-    val_folder = os.path.join() # path to data folder
+    valdir = os.path.join('/home/ubuntu/data/imagenet', 'validation') # path to data folder
 
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
@@ -42,29 +42,30 @@ def main():
             transforms.ToTensor(),
             normalize,
         ])),
-        batch_size=args.batch_size, shuffle=False,
-        num_workers=args.workers, pin_memory=True)
+        batch_size=128, shuffle=False,
+        num_workers=8, pin_memory=True)
 
     
-    model = torchvision.resnet18(pretrained=True)
+    model = models.vgg19(pretrained=True)
 
-    model_conv_output = nn.sequential(*list(model.children()))[:-2]
+    model_conv_output = nn.Sequential(*list(model.children()))[:-2]
     device = "cuda:0"
     model_conv_output.to(device)
 
-    for model_conv_output.parameters():
-        model_conv_output.requires_grad = False
+    for m in model_conv_output.parameters():
+        m.requires_grad = False
 
     for i, (input, target) in enumerate(val_loader):
         input = input.to(device)
         target = target.to(device)
 
-        output = model(input)
+        output = model_conv_output(input)
         for val_test in val_range:
             # puts one where condition is matched
-            num_ones = torch.where(output <= val_range, 1, 0)
-            elem_less = num_ones.nonzero()
-            data_dict[val_range] += elem_less
+            # import ipdb; ipdb.set_trace()
+            num_ones = torch.where(output <= val_test, torch.tensor(1, device=device), torch.tensor(0, device=device))
+            elem_less = num_ones.nonzero().size(0)
+            data_dict[val_test] += elem_less
             max_batch = torch.max(output)
         if max_batch > max_val:
             max_val = max_batch
@@ -74,6 +75,7 @@ def main():
         
     print ("Max val = {}".format(max_val))
     print ("Min val = {}".format(min_val))
+    print ("Num stats = {}".format(data_dict))
 
 if __name__ == "__main__":
     main()

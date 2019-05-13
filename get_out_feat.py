@@ -48,7 +48,7 @@ def main():
     
     model = models.resnet18(pretrained=True)
 
-    model_conv_output = nn.Sequential(*list(model.children()))[:-2]
+    model_conv_output = nn.Sequential(*list(model.children()))[:-1]
     device = "cuda:0"
     model_conv_output.to(device)
     tota_elements = 0

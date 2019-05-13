@@ -46,12 +46,12 @@ def main():
         num_workers=8, pin_memory=True)
 
     
-    model = models.vgg19(pretrained=True)
+    model = models.resnet18(pretrained=True)
 
     model_conv_output = nn.Sequential(*list(model.children()))[:-2]
     device = "cuda:0"
     model_conv_output.to(device)
-
+    tota_elements = 0
     for m in model_conv_output.parameters():
         m.requires_grad = False
 
@@ -60,6 +60,7 @@ def main():
         target = target.to(device)
 
         output = model_conv_output(input)
+        tota_elements += output.reshape(-1).size(0)
         for val_test in val_range:
             # puts one where condition is matched
             # import ipdb; ipdb.set_trace()
@@ -76,6 +77,8 @@ def main():
     print ("Max val = {}".format(max_val))
     print ("Min val = {}".format(min_val))
     print ("Num stats = {}".format(data_dict))
+    print ("Total num elements = {}".format(tota_elements))
+   
 
 if __name__ == "__main__":
     main()
